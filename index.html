@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penn Meal Swipe Share</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #011F5B 0%, #990000 100%);
+        }
+        .card-hover {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-utensils text-2xl"></i>
+                    <h1 class="text-2xl font-bold">Penn Meal Swipe Share</h1>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#home" class="hover:text-gray-200 transition">Home</a>
+                    <a href="#how-it-works" class="hover:text-gray-200 transition">How It Works</a>
+                    <a href="#browse" class="hover:text-gray-200 transition">Browse</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="gradient-bg text-white py-20">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-5xl font-bold mb-6">Share Meals, Build Connections</h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">Connect underclassmen with meal swipes to upperclassmen for shared dining experiences at Penn</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="showSection('offer')" class="bg-white text-blue-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                    <i class="fas fa-gift mr-2"></i>Offer Meal Swipes
+                </button>
+                <button onclick="showSection('request')" class="bg-red-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-800 transition">
+                    <i class="fas fa-hand-holding-heart mr-2"></i>Request a Meal
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">How It Works</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user-plus text-3xl text-blue-900"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">1. Sign Up</h3>
+                    <p class="text-gray-600">Underclassmen offer meal swipes, upperclassmen request meals</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-red-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-handshake text-3xl text-red-700"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">2. Get Matched</h3>
+                    <p class="text-gray-600">Browse profiles and connect with your perfect dining partner</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-utensils text-3xl text-green-700"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">3. Eat Together</h3>
+                    <p class="text-gray-600">Coordinate schedules and enjoy a meal at your favorite dining hall</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Offer Meal Swipes Form -->
+    <section id="offer-section" class="py-16 bg-gray-50 hidden">
+        <div class="container mx-auto px-4 max-w-2xl">
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">
+                    <i class="fas fa-gift text-blue-900 mr-2"></i>Offer Meal Swipes
+                </h2>
+                <p class="text-gray-600 mb-6">Underclassmen: Share your extra meal swipes and make new friends!</p>
+                
+                <iframe id="offer-form" src="" width="100%" height="1200" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+                
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-gray-700">
+                        <strong>Note:</strong> After submitting, your profile will appear in the browse section where upperclassmen can request to dine with you.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Request Meal Form -->
+    <section id="request-section" class="py-16 bg-gray-50 hidden">
+        <div class="container mx-auto px-4 max-w-2xl">
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">
+                    <i class="fas fa-hand-holding-heart text-red-700 mr-2"></i>Request a Meal
+                </h2>
+                <p class="text-gray-600 mb-6">Upperclassmen: Browse available meal swipes and connect with underclassmen!</p>
+                
+                <iframe id="request-form" src="" width="100%" height="1400" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+                
+                <div class="mt-6 p-4 bg-red-50 rounded-lg">
+                    <p class="text-sm text-gray-700">
+                        <strong>Note:</strong> After submitting a request, you'll be matched based on schedule compatibility and preferences.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Browse Section -->
+    <section id="browse" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">Browse Available Meal Swipes</h2>
+            
+            <div class="max-w-4xl mx-auto mb-8">
+                <div class="bg-blue-50 border-l-4 border-blue-900 p-4 rounded">
+                    <p class="text-gray-700">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>To view current offers:</strong> Check the Google Sheet linked below or contact students directly via email.
+                    </p>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <a href="#" id="sheet-link" target="_blank" class="inline-block bg-blue-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-800 transition">
+                    <i class="fas fa-table mr-2"></i>View All Offers & Requests
+                </a>
+            </div>
+
+            <!-- Sample Cards (these would be dynamically loaded from Google Sheets) -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+                <div class="bg-white border-2 border-gray-200 rounded-lg p-6 card-hover">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-900 text-white w-12 h-12 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg">Sample Student</h3>
+                            <p class="text-sm text-gray-600">Sophomore, Wharton</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <p><i class="fas fa-ticket-alt text-blue-900 mr-2"></i><strong>Swipes Available:</strong> 5</p>
+                        <p><i class="fas fa-clock text-blue-900 mr-2"></i><strong>Available:</strong> Weekday evenings</p>
+                        <p><i class="fas fa-map-marker-alt text-blue-900 mr-2"></i><strong>Preferred Hall:</strong> Commons</p>
+                    </div>
+                    <button class="w-full mt-4 bg-red-700 text-white py-2 rounded-lg hover:bg-red-800 transition">
+                        Request to Connect
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="mb-2">Penn Meal Swipe Share - Building Community One Meal at a Time</p>
+            <p class="text-gray-400 text-sm">Made for Penn students, by Penn students</p>
+            <div class="mt-4 space-x-4">
+                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,380 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║           PENN MEAL SWIPE SHARE - SYSTEM ARCHITECTURE                ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                         USER INTERFACE                               │
+└─────────────────────────────────────────────────────────────────────┘
+                                  │
+                    ┌─────────────┴─────────────┐
+                    ▼                           ▼
+        ┌───────────────────┐       ┌───────────────────┐
+        │  OFFER SWIPES     │       │  REQUEST MEALS    │
+        │  (Underclassmen)  │       │  (Upperclassmen)  │
+        └───────────────────┘       └───────────────────┘
+                    │                           │
+                    │                           │
+                    ▼                           ▼
+        ┌───────────────────────────────────────────────┐
+        │         GOOGLE FORMS (Data Collection)        │
+        │  • Penn Email Validation                      │
+        │  • Availability Capture                       │
+        │  • Interest Matching                          │
+        └───────────────────────────────────────────────┘
+                              │
+                              ▼
+        ┌───────────────────────────────────────────────┐
+        │       GOOGLE SHEETS (Database)                │
+        │  • Sheet 1: Offer Responses                   │
+        │  • Sheet 2: Request Responses                 │
+        │  • Sheet 3: Matches & History                 │
+        └───────────────────────────────────────────────┘
+                              │
+                              ▼
+        ┌───────────────────────────────────────────────┐
+        │    GOOGLE APPS SCRIPT (Automation)            │
+        │  • Automatic matching algorithm               │
+        │  • Email notifications                        │
+        │  • Confirmation emails                        │
+        └───────────────────────────────────────────────┘
+                              │
+                ┌─────────────┴─────────────┐
+                ▼                           ▼
+    ┌─────────────────┐           ┌─────────────────┐
+    │ EMAIL TO        │           │ EMAIL TO        │
+    │ UNDERCLASSMAN   │           │ UPPERCLASSMAN   │
+    └─────────────────┘           └─────────────────┘
+                │                           │
+                └───────────┬───────────────┘
+                            ▼
+                ┌───────────────────────┐
+                │ STUDENTS COORDINATE   │
+                │ • Exchange contact    │
+                │ • Pick time/place     │
+                │ • Confirm meeting     │
+                └───────────────────────┘
+                            │
+                            ▼
+                ┌───────────────────────┐
+                │   MEAL TOGETHER! 🍽️   │
+                │ • Share experience    │
+                │ • Build connection    │
+                │ • Rate/feedback       │
+                └───────────────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                      DATA FLOW DIAGRAM                                ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+Student Visit Website
+        │
+        ├─► Click "Offer Swipes" OR "Request Meal"
+        │
+        └─► Fill Google Form
+                │
+                ├─► Data saved to Google Sheet
+                │
+                └─► Trigger Apps Script
+                        │
+                        ├─► Send confirmation email
+                        │
+                        └─► Run matching algorithm
+                                │
+                                ├─► Find compatible matches
+                                │   • Check availability overlap
+                                │   • Compare dining halls
+                                │   • Match interests
+                                │
+                                ├─► Record match in Matches sheet
+                                │
+                                └─► Send intro emails to both
+                                        │
+                                        └─► Students coordinate
+                                                └─► Success! 🎉
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                   MATCHING ALGORITHM LOGIC                            ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+For each new form submission:
+    │
+    ├─► Load all existing submissions of opposite type
+    │   (Offers look at Requests, Requests look at Offers)
+    │
+    ├─► For each potential match, calculate score:
+    │   │
+    │   ├─► Availability Match (40%)
+    │   │   • Count overlapping time slots
+    │   │   • Higher score = more overlap
+    │   │
+    │   ├─► Dining Hall Match (30%)
+    │   │   • Count common dining halls
+    │   │   • At least 1 shared hall required
+    │   │
+    │   └─► Interest Similarity (30%)
+    │       • Compare text in "About Me" fields
+    │       • Count common keywords
+    │
+    ├─► Sort matches by score (highest first)
+    │
+    └─► If top match score >= 60%:
+        │
+        ├─► Send match notification emails
+        │
+        └─► Record in Matches sheet
+            • Match date
+            • Both students' info
+            • Match score
+            • Status: Pending
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                      FILE STRUCTURE                                   ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+penn-meal-swipes/
+│
+├── 🌐 WEBSITE FILES
+│   ├── index.html              # Main website with Penn branding
+│   └── script.js               # Handles form loading & interactions
+│
+├── 🤖 AUTOMATION
+│   └── google-apps-script.js   # Matching algorithm + email system
+│
+├── 📚 DOCUMENTATION
+│   ├── README.md               # Complete project overview
+│   ├── QUICKSTART.md          # Get running in <1 hour
+│   ├── SETUP_GUIDE.md         # Detailed step-by-step setup
+│   ├── DEPLOYMENT.md          # Hosting options & deployment
+│   └── SYSTEM_OVERVIEW.txt    # This file!
+│
+├── 💌 COMMUNICATION
+│   └── EMAIL_TEMPLATES.md     # All email templates ready to use
+│
+└── 📢 MARKETING
+    └── promotional-content.md  # Social posts, flyers, campaigns
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                    TECHNOLOGY STACK                                   ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────┐
+│    FRONTEND      │    HTML5, Tailwind CSS, Vanilla JavaScript
+└──────────────────┘    • Responsive design
+                        • Mobile-friendly
+                        • Penn branded (Red & Blue)
+
+┌──────────────────┐
+│  DATA COLLECTION │    Google Forms
+└──────────────────┘    • Free & unlimited
+                        • Email validation
+                        • Easy to edit
+
+┌──────────────────┐
+│    DATABASE      │    Google Sheets
+└──────────────────┘    • Auto-updates from forms
+                        • Visual interface
+                        • Export capabilities
+
+┌──────────────────┐
+│   AUTOMATION     │    Google Apps Script
+└──────────────────┘    • JavaScript-based
+                        • Runs on Google servers
+                        • Free email sending
+
+┌──────────────────┐
+│     HOSTING      │    Netlify / GitHub Pages / Vercel
+└──────────────────┘    • Free SSL certificate
+                        • Global CDN
+                        • Instant deployment
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                   MATCHING CRITERIA WEIGHTS                           ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+                    ┌────────────────────────┐
+                    │   TOTAL MATCH SCORE    │
+                    │      (0-100%)          │
+                    └───────────┬────────────┘
+                                │
+                 ┌──────────────┼──────────────┐
+                 │              │              │
+        ┌────────▼────────┐  ┌──▼───────┐  ┌──▼──────────┐
+        │  AVAILABILITY   │  │  DINING  │  │  INTERESTS  │
+        │      40%        │  │   HALL   │  │     30%     │
+        │                 │  │   30%    │  │             │
+        └─────────────────┘  └──────────┘  └─────────────┘
+        │                    │             │
+        │ • Weekday lunch    │ • Commons   │ • Keywords
+        │ • Weekday dinner   │ • Hill      │ • Topics
+        │ • Weekend brunch   │ • English   │ • Hobbies
+        │ • Weekend dinner   │ • Falk      │ • Goals
+        └────────────────────┴─────────────┴──────────────
+
+        Minimum threshold for match: 60% overall score
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                      USER JOURNEY                                     ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+UNDERCLASSMAN JOURNEY:
+━━━━━━━━━━━━━━━━━━━━━━
+1. Sees Instagram post → Clicks link in bio
+2. Lands on website → Clicks "Offer Meal Swipes"
+3. Fills form (2 minutes) → Submits
+4. Receives confirmation email
+5. Gets matched within 48 hours → Receives intro email
+6. Emails upperclassman → Coordinates time
+7. Meets at dining hall → Uses meal swipe
+8. Enjoys conversation → Makes new connection
+9. Receives feedback survey
+10. Signs up again for another match!
+
+UPPERCLASSMAN JOURNEY:
+━━━━━━━━━━━━━━━━━━━━━━
+1. Hears from friend → Visits website
+2. Clicks "Request a Meal"
+3. Fills form → Submits preferences
+4. Receives confirmation email
+5. Gets matched → Receives intro with underclassman info
+6. Responds to underclassman's email
+7. Confirms time/place
+8. Shows up at dining hall → Enjoys free meal
+9. Shares advice/experience
+10. Requests another match!
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                     SAFETY FEATURES                                   ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+✅ Penn Email Required (@upenn.edu)
+   │
+   └─► Verifies Penn student status
+
+✅ Public Meeting Places Only
+   │
+   └─► All meals in campus dining halls
+
+✅ Direct Coordination
+   │
+   └─► Students communicate directly (not through platform)
+   └─► Can verify Penn status in person
+
+✅ Voluntary Participation
+   │
+   └─► No obligation to meet
+   └─► Can request different match anytime
+
+✅ Reporting System
+   │
+   └─► Email for concerns
+   └─► Platform administrators review
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                   SCALING PROJECTIONS                                 ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+Week 1:  20-50 sign-ups
+         │
+         └─► Mostly early adopters & friends
+
+Month 1: 50-150 students
+         │
+         └─► 20-50 successful matches
+         └─► Word-of-mouth begins
+
+Month 3: 200-400 students
+         │
+         └─► 100+ meals shared
+         └─► Recognized on campus
+
+Year 1:  500-1000 students
+         │
+         └─► Established tradition
+         └─► Featured by Penn Dining
+         └─► Potential partnership with university
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                    COST BREAKDOWN                                     ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+TOTALLY FREE OPTION:
+━━━━━━━━━━━━━━━━━━━
+• Google Forms:     $0
+• Google Sheets:    $0
+• Apps Script:      $0
+• GitHub Pages:     $0  OR  Netlify:  $0
+• Domain (optional): ~$12/year
+                    ─────
+TOTAL:              $0-12/year
+
+PREMIUM OPTION (optional):
+━━━━━━━━━━━━━━━━━━━━━━━━━
+• Custom domain:    $12/year
+• Business email:   $6/month
+• Enhanced forms:   Optional
+                    ─────
+TOTAL:              ~$84/year
+
+Recommendation: Start with free, upgrade only if needed!
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                         SUPPORT                                       ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+Have questions? Check these resources:
+
+📖 Documentation
+   • QUICKSTART.md    - Fastest way to launch
+   • SETUP_GUIDE.md   - Detailed instructions
+   • DEPLOYMENT.md    - Hosting help
+
+💻 Technical Help
+   • Google Forms:     support.google.com/forms
+   • Google Sheets:    support.google.com/sheets
+   • Apps Script:      developers.google.com/apps-script
+
+🚀 Deployment Help
+   • Netlify:         docs.netlify.com
+   • GitHub:          docs.github.com/pages
+   • Vercel:          vercel.com/docs
+
+
+╔══════════════════════════════════════════════════════════════════════╗
+║                      SUCCESS METRICS                                  ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+Track these in your Google Sheet:
+
+📊 QUANTITATIVE
+   • Total sign-ups (goal: 100+ in Month 1)
+   • Match rate (goal: 80% of submissions matched)
+   • Completion rate (goal: 70% actually meet)
+   • Repeat usage (goal: 30% sign up again)
+
+💬 QUALITATIVE
+   • User satisfaction (survey after meals)
+   • Success stories (testimonials)
+   • Word-of-mouth growth
+   • Community impact
+
+🎯 MILESTONES
+   [ ] First 10 sign-ups
+   [ ] First successful match
+   [ ] First 50 students
+   [ ] First 100 meals shared
+   [ ] Featured by Penn Dining
+   [ ] 500 total students
+   [ ] Partnership with university
+
+
+Ready to build community at Penn? Let's do this! 🔴🔵
