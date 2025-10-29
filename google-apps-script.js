@@ -7,14 +7,14 @@
 
 const CONFIG = {
   // Email settings
-  senderEmail: "pennmealswipes@gmail.com", // Change this to your email
+  senderEmail: "sahitid@wharton.upenn.edu", // Change this to your email
   senderName: "Penn Meal Swipe Share",
-  
+
   // Sheet names
   offersSheetName: "Offer Swipes Responses",
   requestsSheetName: "Request Meals Responses",
-  matchesSheetName: "Matches",
-  
+  matchesSheetName: "Meal Swipes System",
+
   // Matching criteria weights
   weights: {
     availabilityMatch: 0.4,
@@ -31,14 +31,14 @@ const CONFIG = {
 function onOfferSubmit(e) {
   const timestamp = new Date();
   const response = e.values;
-  
+
   // Extract form data
   const email = response[1]; // Assuming email is in column B
   const name = response[2];
-  
+
   // Send confirmation email to the student who offered swipes
   sendOfferConfirmationEmail(email, name);
-  
+
   // Try to find matches
   findMatchesForNewOffer(response);
 }
@@ -47,14 +47,14 @@ function onOfferSubmit(e) {
 function onRequestSubmit(e) {
   const timestamp = new Date();
   const response = e.values;
-  
+
   // Extract form data
   const email = response[1];
   const name = response[2];
-  
+
   // Send confirmation email
   sendRequestConfirmationEmail(email, name);
-  
+
   // Try to find matches
   findMatchesForNewRequest(response);
 }
@@ -85,7 +85,7 @@ The Penn Meal Swipe Share Team
 ---
 Questions? Reply to this email or check out our website.
   `;
-  
+
   MailApp.sendEmail({
     to: email,
     subject: subject,
@@ -118,7 +118,7 @@ The Penn Meal Swipe Share Team
 ---
 Questions? Reply to this email or check out our website.
   `;
-  
+
   MailApp.sendEmail({
     to: email,
     subject: subject,
@@ -134,20 +134,20 @@ function findMatchesForNewOffer(offerData) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const requestsSheet = ss.getSheetByName(CONFIG.requestsSheetName);
   const matchesSheet = ss.getSheetByName(CONFIG.matchesSheetName);
-  
+
   // Get all requests
   const requestsData = requestsSheet.getDataRange().getValues();
-  
+
   // Skip header row
   const requests = requestsData.slice(1);
-  
+
   // Find best matches
   const matches = [];
-  
+
   for (let i = 0; i < requests.length; i++) {
     const request = requests[i];
     const matchScore = calculateMatchScore(offerData, request);
-    
+
     if (matchScore >= 0.6) { // 60% compatibility threshold
       matches.push({
         offer: offerData,
@@ -157,10 +157,10 @@ function findMatchesForNewOffer(offerData) {
       });
     }
   }
-  
+
   // Sort by score (highest first)
   matches.sort((a, b) => b.score - a.score);
-  
+
   // Send match notification for top match (if exists)
   if (matches.length > 0) {
     const topMatch = matches[0];
@@ -172,18 +172,18 @@ function findMatchesForNewOffer(offerData) {
 function findMatchesForNewRequest(requestData) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const offersSheet = ss.getSheetByName(CONFIG.offersSheetName);
-  
+
   // Get all offers
   const offersData = offersSheet.getDataRange().getValues();
   const offers = offersData.slice(1);
-  
+
   // Find best matches
   const matches = [];
-  
+
   for (let i = 0; i < offers.length; i++) {
     const offer = offers[i];
     const matchScore = calculateMatchScore(offer, requestData);
-    
+
     if (matchScore >= 0.6) {
       matches.push({
         offer: offer,
@@ -193,9 +193,9 @@ function findMatchesForNewRequest(requestData) {
       });
     }
   }
-  
+
   matches.sort((a, b) => b.score - a.score);
-  
+
   if (matches.length > 0) {
     const topMatch = matches[0];
     sendMatchNotification(topMatch.offer, topMatch.request);
@@ -206,37 +206,37 @@ function findMatchesForNewRequest(requestData) {
 function calculateMatchScore(offer, request) {
   // Assuming column structure:
   // [0]=Timestamp, [1]=Email, [2]=Name, [3]=Year, [4]=School, [5]=Swipes/Meals, [6]=Dining Halls, [7]=Availability, [8]=Interests...
-  
+
   let score = 0;
-  
+
   // 1. Availability match (40%)
   const offerAvailability = offer[7] || "";
   const requestAvailability = request[7] || "";
   const availabilityScore = calculateOverlap(offerAvailability, requestAvailability);
   score += availabilityScore * CONFIG.weights.availabilityMatch;
-  
+
   // 2. Dining hall match (30%)
   const offerDiningHalls = offer[6] || "";
   const requestDiningHalls = request[6] || "";
   const diningHallScore = calculateOverlap(offerDiningHalls, requestDiningHalls);
   score += diningHallScore * CONFIG.weights.diningHallMatch;
-  
+
   // 3. Interests similarity (30%)
   const offerInterests = offer[8] || "";
   const requestInterests = request[8] || "";
   const interestsScore = calculateTextSimilarity(offerInterests, requestInterests);
   score += interestsScore * CONFIG.weights.interestsSimilarity;
-  
+
   return score;
 }
 
 function calculateOverlap(str1, str2) {
   if (!str1 || !str2) return 0;
-  
+
   // Split by common separators
   const items1 = str1.toLowerCase().split(/[,;]+/).map(s => s.trim());
   const items2 = str2.toLowerCase().split(/[,;]+/).map(s => s.trim());
-  
+
   let matches = 0;
   for (let item1 of items1) {
     for (let item2 of items2) {
@@ -246,24 +246,24 @@ function calculateOverlap(str1, str2) {
       }
     }
   }
-  
+
   return matches / Math.max(items1.length, items2.length);
 }
 
 function calculateTextSimilarity(text1, text2) {
   if (!text1 || !text2) return 0;
-  
+
   // Simple word-based similarity
   const words1 = text1.toLowerCase().split(/\s+/);
   const words2 = text2.toLowerCase().split(/\s+/);
-  
+
   let commonWords = 0;
   for (let word1 of words1) {
     if (word1.length > 3 && words2.some(word2 => word2.includes(word1) || word1.includes(word2))) {
       commonWords++;
     }
   }
-  
+
   return commonWords / Math.max(words1.length, words2.length);
 }
 
@@ -279,14 +279,14 @@ function sendMatchNotification(offer, request) {
   const offerSchool = offer[4];
   const offerAvailability = offer[7];
   const offerInterests = offer[8];
-  
+
   const requestEmail = request[1];
   const requestName = request[2];
   const requestYear = request[3];
   const requestSchool = request[4];
   const requestAvailability = request[7];
   const requestInterests = request[8];
-  
+
   // Email to underclassman (offering swipes)
   const offerSubject = `You've Been Matched! Meet ${requestName} 🎉`;
   const offerBody = `
@@ -319,7 +319,7 @@ Looking forward to hearing how it goes!
 Best,
 The Penn Meal Swipe Share Team
   `;
-  
+
   // Email to upperclassman (requesting meal)
   const requestSubject = `You've Been Matched! Meet ${offerName} 🎉`;
   const requestBody = `
@@ -349,14 +349,14 @@ Have a great meal together!
 Best,
 The Penn Meal Swipe Share Team
   `;
-  
+
   // Send emails
   MailApp.sendEmail({
     to: offerEmail,
     subject: offerSubject,
     body: offerBody
   });
-  
+
   MailApp.sendEmail({
     to: requestEmail,
     subject: requestSubject,
@@ -371,7 +371,7 @@ The Penn Meal Swipe Share Team
 function recordMatch(offer, request, score) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let matchesSheet = ss.getSheetByName(CONFIG.matchesSheetName);
-  
+
   // Create matches sheet if it doesn't exist
   if (!matchesSheet) {
     matchesSheet = ss.insertSheet(CONFIG.matchesSheetName);
@@ -387,7 +387,7 @@ function recordMatch(offer, request, score) {
       "Status"
     ]);
   }
-  
+
   // Add match record
   matchesSheet.appendRow([
     new Date(),
@@ -411,16 +411,16 @@ function runManualMatching() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const offersSheet = ss.getSheetByName(CONFIG.offersSheetName);
   const requestsSheet = ss.getSheetByName(CONFIG.requestsSheetName);
-  
+
   const offersData = offersSheet.getDataRange().getValues().slice(1);
   const requestsData = requestsSheet.getDataRange().getValues().slice(1);
-  
+
   let matchCount = 0;
-  
+
   for (let offer of offersData) {
     for (let request of requestsData) {
       const score = calculateMatchScore(offer, request);
-      
+
       if (score >= 0.6) {
         sendMatchNotification(offer, request);
         recordMatch(offer, request, score);
@@ -428,15 +428,66 @@ function runManualMatching() {
       }
     }
   }
-  
+
   Logger.log(`Found and sent ${matchCount} matches`);
-  
+
   // Send summary email to admin
   MailApp.sendEmail({
     to: CONFIG.senderEmail,
     subject: "Manual Matching Complete",
     body: `Manual matching process completed. ${matchCount} matches were found and notifications sent.`
   });
+}
+
+// ========================================
+// WEB APP API - Serve data to website
+// ========================================
+
+// This function serves data when the web app is accessed
+function doGet(e) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const offersSheet = ss.getSheetByName(CONFIG.offersSheetName);
+
+    // Get all offer data
+    const offersData = offersSheet.getDataRange().getValues();
+    const headers = offersData[0];
+    const offers = offersData.slice(1); // Skip header row
+
+    // Transform into JSON-friendly format
+    const offersJson = offers.map(row => {
+      // Adjust these indices based on your actual form columns
+      return {
+        timestamp: row[0],
+        email: row[1],
+        name: row[2],
+        year: row[3],
+        school: row[4],
+        swipesAvailable: row[5],
+        diningHalls: row[6],
+        availability: row[7],
+        about: row[8],
+        phone: row[9] || ""
+      };
+    });
+
+    // Return as JSON
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: true,
+        offers: offersJson,
+        count: offersJson.length
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: false,
+        error: error.toString()
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 // ========================================
@@ -451,6 +502,19 @@ TO SET UP THIS SCRIPT:
 3. Delete any existing code and paste this entire script
 4. Update the CONFIG section at the top with your email and sheet names
 5. Save the script (File → Save or Ctrl+S)
+
+TO DEPLOY AS WEB APP (for displaying data on website):
+
+1. In Apps Script, click "Deploy" → "New deployment"
+2. Click the gear icon next to "Select type" → Choose "Web app"
+3. Configure:
+   - Description: "Penn Meal Swipe API"
+   - Execute as: "Me"
+   - Who has access: "Anyone"
+4. Click "Deploy"
+5. Copy the Web App URL (looks like https://script.google.com/macros/s/.../exec)
+6. Paste this URL into CONFIG.apiUrl in script.js
+7. Click "Authorize access" and grant permissions
 
 TO SET UP AUTOMATIC TRIGGERS:
 

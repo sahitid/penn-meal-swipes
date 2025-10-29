@@ -1,185 +1,715 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penn Meal Swipe Share</title>
+    <title>M&T Meal Swipe Share</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap"
+        rel="stylesheet">
     <style>
+        :root {
+            --penn-blue: #011F5B;
+            --penn-blue-light: #013872;
+            --penn-blue-dark: #001741;
+            --penn-red: #990000;
+            --penn-red-light: #C41E3A;
+            --penn-gold: #D4AF37;
+            --penn-cream: #F8F5F0;
+            --penn-gray: #3D4B5F;
+        }
+
+        * {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+        }
+
+        .font-serif {
+            font-family: 'Libre Baskerville', Georgia, serif;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Typography Scale */
+        .text-hero {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+        }
+
+        .text-section-title {
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .text-body-large {
+            font-size: 1.125rem;
+            line-height: 1.7;
+            color: #374151;
+        }
+
+        /* Gradient Background */
         .gradient-bg {
-            background: linear-gradient(135deg, #011F5B 0%, #990000 100%);
+            background: linear-gradient(135deg, var(--penn-blue) 0%, #01295A 50%, var(--penn-red) 100%);
+            position: relative;
         }
-        .card-hover {
-            transition: transform 0.2s, box-shadow 0.2s;
+
+        /* Pattern Overlay */
+        .pattern-overlay::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 1;
         }
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+
+        /* Animated glow */
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 0.2;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.3;
+                transform: scale(1.1);
+            }
+        }
+
+        .animated-glow {
+            animation: pulse-glow 4s ease-in-out infinite;
+        }
+
+        /* Penn Card Style */
+        .penn-card {
+            background: linear-gradient(135deg, rgba(1, 31, 91, 0.02) 0%, rgba(153, 0, 0, 0.02) 100%);
+            border-left: 4px solid var(--penn-blue);
+            box-shadow:
+                0 1px 3px rgba(0, 0, 0, 0.08),
+                0 10px 30px rgba(1, 31, 91, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .penn-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow:
+                0 20px 40px rgba(1, 31, 91, 0.15),
+                0 4px 12px rgba(1, 31, 91, 0.1);
+            border-left-color: var(--penn-red);
+        }
+
+        /* Premium Button */
+        .penn-button {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .penn-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .penn-button:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .penn-button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Animated underline */
+        .nav-link {
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(to right, var(--penn-blue), var(--penn-red));
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Fade in animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        /* Stagger animation delays */
+        .delay-100 {
+            animation-delay: 0.1s;
+            opacity: 0;
+        }
+
+        .delay-200 {
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+
+        .delay-300 {
+            animation-delay: 0.3s;
+            opacity: 0;
+        }
+
+        .delay-400 {
+            animation-delay: 0.4s;
+            opacity: 0;
+        }
+
+        /* Feature card icon glow */
+        .icon-glow {
+            position: relative;
+        }
+
+        .icon-glow::before {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            background: inherit;
+            border-radius: inherit;
+            filter: blur(20px);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .icon-glow:hover::before {
+            opacity: 0.4;
+        }
+
+        /* Progress bar animation */
+        .progress-bar {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            width: 0;
+            background: linear-gradient(to right, var(--penn-blue), var(--penn-red));
+            transition: width 0.5s ease;
+            border-radius: 2px;
+        }
+
+        .progress-bar:hover::after {
+            width: 100%;
+        }
+
+        /* Line clamp */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Backdrop blur support */
+        @supports (backdrop-filter: blur(10px)) {
+            .backdrop-blur-custom {
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
         }
     </style>
 </head>
+
 <body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="gradient-bg text-white shadow-lg">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
+    <!-- Professional Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-custom border-b border-gray-200 shadow-sm">
+        <div class="container mx-auto px-6">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo area -->
                 <div class="flex items-center space-x-3">
-                    <i class="fas fa-utensils text-2xl"></i>
-                    <h1 class="text-2xl font-bold">Penn Meal Swipe Share</h1>
+                    <div
+                        class="w-11 h-11 bg-gradient-to-br from-[#011F5B] to-[#990000] rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-utensils text-white text-lg"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-[#011F5B] text-lg leading-none tracking-tight">
+                            M&T Meal Share
+                        </span>
+                        <span class="text-xs text-gray-500 font-medium tracking-wide">
+                            Building Community
+                        </span>
+                    </div>
                 </div>
-                <div class="hidden md:flex space-x-6">
-                    <a href="#home" class="hover:text-gray-200 transition">Home</a>
-                    <a href="#how-it-works" class="hover:text-gray-200 transition">How It Works</a>
-                    <a href="#browse" class="hover:text-gray-200 transition">Browse</a>
+
+                <!-- Navigation links -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="nav-link text-gray-700 hover:text-[#011F5B] font-medium transition-colors">
+                        Home
+                    </a>
+                    <a href="#how-it-works"
+                        class="nav-link text-gray-700 hover:text-[#011F5B] font-medium transition-colors">
+                        How It Works
+                    </a>
+                    <a href="#browse" class="nav-link text-gray-700 hover:text-[#011F5B] font-medium transition-colors">
+                        Browse
+                    </a>
                 </div>
+
+                <!-- CTA button -->
+                <button onclick="showSection('offer')"
+                    class="hidden md:block penn-button px-6 py-2.5 bg-gradient-to-r from-[#011F5B] to-[#013872] text-white font-semibold rounded-lg shadow-lg shadow-blue-900/20 hover:shadow-xl hover:shadow-blue-900/30">
+                    <span class="relative z-10">Get Started</span>
+                </button>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section id="home" class="gradient-bg text-white py-20">
-        <div class="container mx-auto px-4 text-center">
-            <h2 class="text-5xl font-bold mb-6">Share Meals, Build Connections</h2>
-            <p class="text-xl mb-8 max-w-2xl mx-auto">Connect underclassmen with meal swipes to upperclassmen for shared dining experiences at Penn</p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onclick="showSection('offer')" class="bg-white text-blue-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
-                    <i class="fas fa-gift mr-2"></i>Offer Meal Swipes
-                </button>
-                <button onclick="showSection('request')" class="bg-red-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-800 transition">
-                    <i class="fas fa-hand-holding-heart mr-2"></i>Request a Meal
-                </button>
+    <!-- Premium Hero Section -->
+    <section id="home" class="relative min-h-[85vh] flex items-center overflow-hidden gradient-bg pattern-overlay">
+        <!-- Animated glow effect -->
+        <div
+            class="absolute top-1/4 right-1/4 w-96 h-96 bg-[#990000] rounded-full filter blur-[120px] opacity-20 animated-glow">
+        </div>
+        <div class="absolute bottom-1/3 left-1/4 w-80 h-80 bg-[#D4AF37] rounded-full filter blur-[100px] opacity-10 animated-glow"
+            style="animation-delay: 2s;"></div>
+
+        <div class="relative z-10 container mx-auto px-6">
+            <div class="max-w-5xl mx-auto text-center">
+                <!-- Eyebrow text -->
+                <div
+                    class="inline-flex items-center px-5 py-2.5 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm font-semibold mb-8 animate-fade-in shadow-lg">
+                    <span class="w-2 h-2 bg-[#D4AF37] rounded-full mr-2.5 animate-pulse"></span>
+                    Jerome Fisher Program in Management & Technology
+                </div>
+
+                <!-- Main heading with emphasis -->
+                <h1 class="text-hero text-white mb-8 font-serif animate-fade-in delay-100">
+                    Share <span class="text-[#D4AF37] italic font-bold">Meals</span>,<br />
+                    Build <span class="relative inline-block">
+                        <span class="relative z-10">Connections</span>
+                        <span class="absolute bottom-2 left-0 w-full h-4 bg-[#990000] -skew-y-1 opacity-80"></span>
+                    </span>
+                </h1>
+
+                <p
+                    class="text-body-large text-white/95 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in delay-200">
+                    Connect M&T underclassmen with meal swipes to upperclassmen for
+                    shared dining experiences. Make friends, find mentors, and
+                    build the M&T community—one meal at a time.
+                </p>
+
+                <!-- CTA buttons with proper hierarchy -->
+                <div class="flex flex-col sm:flex-row gap-5 justify-center mb-16 animate-fade-in delay-300">
+                    <button onclick="showSection('offer')"
+                        class="group penn-button px-10 py-4 bg-white text-[#011F5B] font-bold rounded-xl shadow-2xl shadow-black/20 hover:shadow-3xl hover:scale-105">
+                        <span class="relative z-10 flex items-center justify-center">
+                            <i class="fas fa-gift mr-2.5 group-hover:rotate-12 transition-transform"></i>
+                            Offer Meal Swipes
+                        </span>
+                    </button>
+
+                    <button onclick="showSection('request')"
+                        class="penn-button px-10 py-4 border-2 border-white/50 text-white font-semibold rounded-xl backdrop-blur-sm hover:bg-white/10 hover:border-white">
+                        <span class="relative z-10 flex items-center justify-center">
+                            <i class="fas fa-hand-holding-heart mr-2.5"></i>
+                            Request a Meal
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Social proof -->
+                <div
+                    class="flex flex-col sm:flex-row items-center justify-center gap-8 text-white/80 animate-fade-in delay-400">
+                    <div class="flex items-center gap-4">
+                        <div class="flex -space-x-3">
+                            <div
+                                class="w-11 h-11 rounded-full bg-gradient-to-br from-[#011F5B] to-[#013872] border-3 border-white/30 flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                                GA</div>
+                            <div
+                                class="w-11 h-11 rounded-full bg-gradient-to-br from-[#990000] to-[#C41E3A] border-3 border-white/30 flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                                LC</div>
+                            <div
+                                class="w-11 h-11 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#B8941F] border-3 border-white/30 flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                                SD</div>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-bold text-white text-lg font-mono">200+</p>
+                            <p class="text-sm text-white/70">M&T Students</p>
+                        </div>
+                    </div>
+                    <div class="hidden sm:block w-px h-12 bg-white/20"></div>
+                    <div class="flex items-center gap-2.5">
+                        <i class="fas fa-star text-[#D4AF37] text-lg"></i>
+                        <span class="font-medium text-white">Trusted by the M&T Community</span>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Decorative gradient fade -->
+        <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent"></div>
     </section>
 
     <!-- How It Works -->
-    <section id="how-it-works" class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">How It Works</h2>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-user-plus text-3xl text-blue-900"></i>
+    <section id="how-it-works" class="relative py-24 bg-gradient-to-b from-white to-gray-50 overflow-hidden">
+        <!-- Decorative background elements -->
+        <div class="absolute top-20 right-10 w-72 h-72 bg-[#011F5B] rounded-full filter blur-[100px] opacity-5"></div>
+        <div class="absolute bottom-20 left-10 w-64 h-64 bg-[#990000] rounded-full filter blur-[100px] opacity-5"></div>
+
+        <div class="container mx-auto px-6 relative z-10">
+            <!-- Section header -->
+            <div class="text-center mb-16">
+                <span
+                    class="inline-block px-4 py-1.5 bg-[#011F5B]/10 text-[#011F5B] rounded-full text-sm font-semibold mb-4">
+                    Simple Process
+                </span>
+                <h2 class="text-section-title text-gray-900 font-serif mb-4">How It Works</h2>
+                <p class="text-body-large text-gray-600 max-w-2xl mx-auto">
+                    Three simple steps to connect with fellow M&T students over a meal
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- Card 1 -->
+                <div
+                    class="group relative bg-white rounded-2xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_60px_rgba(1,31,91,0.12)] transition-all duration-300 hover:-translate-y-2">
+                    <!-- Number badge -->
+                    <div
+                        class="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-[#011F5B] to-[#013872] rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg transform group-hover:rotate-6 transition-transform">
+                        1
                     </div>
-                    <h3 class="text-xl font-semibold mb-3">1. Sign Up</h3>
-                    <p class="text-gray-600">Underclassmen offer meal swipes, upperclassmen request meals</p>
+
+                    <!-- Icon container -->
+                    <div class="relative mb-6 mt-4">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-[#011F5B] to-[#013872] rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity">
+                        </div>
+                        <div
+                            class="icon-glow relative w-20 h-20 bg-gradient-to-br from-[#011F5B] to-[#013872] rounded-2xl flex items-center justify-center mx-auto transform group-hover:scale-110 transition-transform">
+                            <i class="fas fa-user-plus text-3xl text-white"></i>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <h3
+                        class="text-xl font-bold text-gray-900 mb-3 text-center group-hover:text-[#011F5B] transition-colors">
+                        Sign Up
+                    </h3>
+                    <p class="text-gray-600 leading-relaxed text-center mb-4">
+                        Underclassmen offer meal swipes, upperclassmen request meals. Takes just 2 minutes.
+                    </p>
+
+                    <!-- Decorative bar -->
+                    <div
+                        class="progress-bar mt-6 h-1 w-16 bg-gradient-to-r from-[#011F5B] to-[#013872] rounded-full mx-auto">
+                    </div>
                 </div>
-                <div class="text-center">
-                    <div class="bg-red-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-handshake text-3xl text-red-700"></i>
+
+                <!-- Card 2 -->
+                <div
+                    class="group relative bg-white rounded-2xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_60px_rgba(153,0,0,0.12)] transition-all duration-300 hover:-translate-y-2">
+                    <!-- Number badge -->
+                    <div
+                        class="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-[#990000] to-[#C41E3A] rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg transform group-hover:rotate-6 transition-transform">
+                        2
                     </div>
-                    <h3 class="text-xl font-semibold mb-3">2. Get Matched</h3>
-                    <p class="text-gray-600">Browse profiles and connect with your perfect dining partner</p>
+
+                    <!-- Icon container -->
+                    <div class="relative mb-6 mt-4">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-[#990000] to-[#C41E3A] rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity">
+                        </div>
+                        <div
+                            class="icon-glow relative w-20 h-20 bg-gradient-to-br from-[#990000] to-[#C41E3A] rounded-2xl flex items-center justify-center mx-auto transform group-hover:scale-110 transition-transform">
+                            <i class="fas fa-handshake text-3xl text-white"></i>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <h3
+                        class="text-xl font-bold text-gray-900 mb-3 text-center group-hover:text-[#990000] transition-colors">
+                        Get Matched
+                    </h3>
+                    <p class="text-gray-600 leading-relaxed text-center mb-4">
+                        Browse profiles and connect with your perfect dining partner based on schedule and preferences.
+                    </p>
+
+                    <!-- Decorative bar -->
+                    <div
+                        class="progress-bar mt-6 h-1 w-16 bg-gradient-to-r from-[#990000] to-[#C41E3A] rounded-full mx-auto">
+                    </div>
                 </div>
-                <div class="text-center">
-                    <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-utensils text-3xl text-green-700"></i>
+
+                <!-- Card 3 -->
+                <div
+                    class="group relative bg-white rounded-2xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_60px_rgba(212,175,55,0.12)] transition-all duration-300 hover:-translate-y-2">
+                    <!-- Number badge -->
+                    <div
+                        class="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-[#D4AF37] to-[#B8941F] rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg transform group-hover:rotate-6 transition-transform">
+                        3
                     </div>
-                    <h3 class="text-xl font-semibold mb-3">3. Eat Together</h3>
-                    <p class="text-gray-600">Coordinate schedules and enjoy a meal at your favorite dining hall</p>
+
+                    <!-- Icon container -->
+                    <div class="relative mb-6 mt-4">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-[#D4AF37] to-[#B8941F] rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity">
+                        </div>
+                        <div
+                            class="icon-glow relative w-20 h-20 bg-gradient-to-br from-[#D4AF37] to-[#B8941F] rounded-2xl flex items-center justify-center mx-auto transform group-hover:scale-110 transition-transform">
+                            <i class="fas fa-utensils text-3xl text-white"></i>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <h3
+                        class="text-xl font-bold text-gray-900 mb-3 text-center group-hover:text-[#D4AF37] transition-colors">
+                        Eat Together
+                    </h3>
+                    <p class="text-gray-600 leading-relaxed text-center mb-4">
+                        Coordinate schedules and enjoy a meal together at your favorite Penn dining hall.
+                    </p>
+
+                    <!-- Decorative bar -->
+                    <div
+                        class="progress-bar mt-6 h-1 w-16 bg-gradient-to-r from-[#D4AF37] to-[#B8941F] rounded-full mx-auto">
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Offer Meal Swipes Form -->
-    <section id="offer-section" class="py-16 bg-gray-50 hidden">
-        <div class="container mx-auto px-4 max-w-2xl">
-            <div class="bg-white rounded-lg shadow-lg p-8">
-                <h2 class="text-3xl font-bold mb-6 text-gray-800">
-                    <i class="fas fa-gift text-blue-900 mr-2"></i>Offer Meal Swipes
-                </h2>
-                <p class="text-gray-600 mb-6">Underclassmen: Share your extra meal swipes and make new friends!</p>
-                
-                <iframe id="offer-form" src="" width="100%" height="1200" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-                
-                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <p class="text-sm text-gray-700">
-                        <strong>Note:</strong> After submitting, your profile will appear in the browse section where upperclassmen can request to dine with you.
+    <section id="offer-section" class="py-20 bg-gradient-to-b from-gray-50 to-white hidden">
+        <div class="container mx-auto px-6 max-w-3xl">
+            <div class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.08)] p-10 border border-gray-100">
+                <!-- Header -->
+                <div class="mb-8">
+                    <div
+                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#011F5B]/10 to-[#013872]/10 text-[#011F5B] rounded-full text-sm font-semibold mb-4">
+                        <i class="fas fa-gift mr-2"></i>
+                        For Underclassmen
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-3 font-serif">
+                        Offer Meal Swipes
+                    </h2>
+                    <p class="text-body-large text-gray-600 leading-relaxed">
+                        Share your extra meal swipes and make new friends in the M&T program! Connect with upperclassmen
+                        who want to be part of the dining hall experience.
                     </p>
+                </div>
+
+                <iframe id="offer-form" src="" width="100%" height="1200" frameborder="0" marginheight="0"
+                    marginwidth="0" class="rounded-lg">Loading…</iframe>
+
+                <div
+                    class="mt-8 p-5 bg-gradient-to-r from-[#011F5B]/5 to-[#013872]/5 rounded-xl border-l-4 border-[#011F5B]">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-info-circle text-[#011F5B] text-lg mt-0.5"></i>
+                        <div>
+                            <p class="font-semibold text-gray-900 mb-1">What happens next?</p>
+                            <p class="text-sm text-gray-700 leading-relaxed">
+                                After submitting, your profile will appear in the browse section where upperclassmen can
+                                request to dine with you. You'll be notified when someone wants to connect!
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Request Meal Form -->
-    <section id="request-section" class="py-16 bg-gray-50 hidden">
-        <div class="container mx-auto px-4 max-w-2xl">
-            <div class="bg-white rounded-lg shadow-lg p-8">
-                <h2 class="text-3xl font-bold mb-6 text-gray-800">
-                    <i class="fas fa-hand-holding-heart text-red-700 mr-2"></i>Request a Meal
-                </h2>
-                <p class="text-gray-600 mb-6">Upperclassmen: Browse available meal swipes and connect with underclassmen!</p>
-                
-                <iframe id="request-form" src="" width="100%" height="1400" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-                
-                <div class="mt-6 p-4 bg-red-50 rounded-lg">
-                    <p class="text-sm text-gray-700">
-                        <strong>Note:</strong> After submitting a request, you'll be matched based on schedule compatibility and preferences.
+    <section id="request-section" class="py-20 bg-gradient-to-b from-gray-50 to-white hidden">
+        <div class="container mx-auto px-6 max-w-3xl">
+            <div class="bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.08)] p-10 border border-gray-100">
+                <!-- Header -->
+                <div class="mb-8">
+                    <div
+                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#990000]/10 to-[#C41E3A]/10 text-[#990000] rounded-full text-sm font-semibold mb-4">
+                        <i class="fas fa-hand-holding-heart mr-2"></i>
+                        For Upperclassmen
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-3 font-serif">
+                        Request a Meal
+                    </h2>
+                    <p class="text-body-large text-gray-600 leading-relaxed">
+                        Browse available meal swipes and connect with M&T underclassmen! Relive the dining hall
+                        experience and build connections across class years.
                     </p>
+                </div>
+
+                <iframe id="request-form" src="" width="100%" height="1400" frameborder="0" marginheight="0"
+                    marginwidth="0" class="rounded-lg">Loading…</iframe>
+
+                <div
+                    class="mt-8 p-5 bg-gradient-to-r from-[#990000]/5 to-[#C41E3A]/5 rounded-xl border-l-4 border-[#990000]">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-info-circle text-[#990000] text-lg mt-0.5"></i>
+                        <div>
+                            <p class="font-semibold text-gray-900 mb-1">What happens next?</p>
+                            <p class="text-sm text-gray-700 leading-relaxed">
+                                After submitting a request, you'll be matched based on schedule compatibility and
+                                preferences. We'll notify you once a match is found!
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Browse Section -->
-    <section id="browse" class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <h2 class="text-4xl font-bold text-center mb-12 text-gray-800">Browse Available Meal Swipes</h2>
-            
-            <div class="max-w-4xl mx-auto mb-8">
-                <div class="bg-blue-50 border-l-4 border-blue-900 p-4 rounded">
-                    <p class="text-gray-700">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <strong>To view current offers:</strong> Check the Google Sheet linked below or contact students directly via email.
-                    </p>
+    <section id="browse" class="relative py-24 bg-gradient-to-b from-white via-gray-50 to-white overflow-hidden">
+        <!-- Decorative elements -->
+        <div class="absolute top-40 left-10 w-64 h-64 bg-[#011F5B] rounded-full filter blur-[100px] opacity-5"></div>
+        <div class="absolute bottom-40 right-10 w-72 h-72 bg-[#990000] rounded-full filter blur-[100px] opacity-5">
+        </div>
+
+        <div class="container mx-auto px-6 relative z-10">
+            <!-- Section header -->
+            <div class="text-center mb-16">
+                <span
+                    class="inline-block px-4 py-1.5 bg-[#D4AF37]/10 text-[#D4AF37] rounded-full text-sm font-semibold mb-4">
+                    Available Now
+                </span>
+                <h2 class="text-section-title text-gray-900 font-serif mb-4">Browse Available Meal Swipes</h2>
+                <p class="text-body-large text-gray-600 max-w-2xl mx-auto">
+                    Connect with M&T students offering meal swipes. View profiles, check availability, and request to
+                    dine together.
+                </p>
+            </div>
+
+            <!-- Info banner -->
+            <div class="max-w-4xl mx-auto mb-12">
+                <div
+                    class="bg-gradient-to-r from-[#011F5B]/5 to-[#013872]/5 border-l-4 border-[#011F5B] p-6 rounded-xl shadow-sm">
+                    <div class="flex items-start gap-4">
+                        <i class="fas fa-info-circle text-[#011F5B] text-xl mt-0.5"></i>
+                        <div>
+                            <p class="font-semibold text-gray-900 mb-2">How to connect</p>
+                            <p class="text-gray-700 leading-relaxed">
+                                Browse profiles below and click "Request to Connect" to reach out. You can also view the
+                                full spreadsheet for detailed availability and contact information.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="text-center">
-                <a href="#" id="sheet-link" target="_blank" class="inline-block bg-blue-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-800 transition">
-                    <i class="fas fa-table mr-2"></i>View All Offers & Requests
+            <!-- View spreadsheet button -->
+            <div class="text-center mb-16">
+                <a href="#" id="sheet-link" target="_blank"
+                    class="inline-flex items-center penn-button px-8 py-4 bg-gradient-to-r from-[#011F5B] to-[#013872] text-white font-semibold rounded-xl shadow-lg shadow-blue-900/20 hover:shadow-xl hover:shadow-blue-900/30">
+                    <span class="relative z-10 flex items-center">
+                        <i class="fas fa-table mr-2.5"></i>
+                        View All Offers & Requests
+                    </span>
                 </a>
             </div>
 
-            <!-- Sample Cards (these would be dynamically loaded from Google Sheets) -->
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-                <div class="bg-white border-2 border-gray-200 rounded-lg p-6 card-hover">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-blue-900 text-white w-12 h-12 rounded-full flex items-center justify-center mr-3">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-lg">Sample Student</h3>
-                            <p class="text-sm text-gray-600">Sophomore, Wharton</p>
-                        </div>
-                    </div>
-                    <div class="space-y-2 text-sm">
-                        <p><i class="fas fa-ticket-alt text-blue-900 mr-2"></i><strong>Swipes Available:</strong> 5</p>
-                        <p><i class="fas fa-clock text-blue-900 mr-2"></i><strong>Available:</strong> Weekday evenings</p>
-                        <p><i class="fas fa-map-marker-alt text-blue-900 mr-2"></i><strong>Preferred Hall:</strong> Commons</p>
-                    </div>
-                    <button class="w-full mt-4 bg-red-700 text-white py-2 rounded-lg hover:bg-red-800 transition">
-                        Request to Connect
-                    </button>
-                </div>
+            <!-- Dynamic Cards Container (loaded from Google Sheets) -->
+            <div id="offers-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                <!-- Cards will be dynamically loaded here -->
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8">
-        <div class="container mx-auto px-4 text-center">
-            <p class="mb-2">Penn Meal Swipe Share - Building Community One Meal at a Time</p>
-            <p class="text-gray-400 text-sm">Made for Penn students, by Penn students</p>
-            <div class="mt-4 space-x-4">
-                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook"></i></a>
+    <!-- Premium Footer -->
+    <footer
+        class="relative bg-gradient-to-br from-[#011F5B] via-[#01295A] to-[#001741] text-white py-16 overflow-hidden">
+        <!-- Pattern overlay -->
+        <div class="absolute inset-0 opacity-5"
+            style="background-image: url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E&quot;);">
+        </div>
+
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="max-w-4xl mx-auto text-center">
+                <!-- Logo/Brand -->
+                <div class="flex items-center justify-center space-x-3 mb-6">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-white to-gray-200 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-utensils text-[#011F5B] text-xl"></i>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-white text-xl leading-none">M&T Meal Share</h3>
+                        <p class="text-xs text-white/70 font-medium">Management & Technology</p>
+                    </div>
+                </div>
+
+                <!-- Main text -->
+                <p class="text-lg font-semibold text-white mb-2">
+                    Building Community One Meal at a Time
+                </p>
+                <p class="text-white/70 mb-8">
+                    Made for M&T students, by M&T students
+                </p>
+
+                <!-- Social link -->
+                <div class="flex justify-center gap-4 mb-8">
+                    <a href="https://www.instagram.com/mandtboard/" target="_blank"
+                        class="group flex items-center gap-2.5 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg transition-all duration-200">
+                        <i class="fab fa-instagram text-xl text-white group-hover:scale-110 transition-transform"></i>
+                        <span class="text-white font-medium">@mandtboard</span>
+                    </a>
+                </div>
+
+                <!-- Divider -->
+                <div class="h-px bg-white/20 my-4"></div>
+
+                <!-- Copyright -->
+                <p class="text-sm text-white/60">
+                    © 2025 M&T Meal Swipe Share. Made with <span class="text-[#D4AF37]">♥</span> by <a
+                        href="https://www.sahiti.dev/" target="_blank"
+                        class="hover:text-[#D4AF37] transition-colors">Sahiti Dasari</a>.
+                </p>
             </div>
         </div>
     </footer>
 
     <script src="script.js"></script>
 </body>
+
 </html>
