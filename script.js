@@ -1,8 +1,8 @@
 // Configuration - UPDATE THESE WITH YOUR GOOGLE FORM URLs
 const CONFIG = {
-    offerFormUrl: 'YOUR_GOOGLE_FORM_URL_FOR_OFFERING_SWIPES',
-    requestFormUrl: 'YOUR_GOOGLE_FORM_URL_FOR_REQUESTING_MEALS',
-    spreadsheetUrl: 'YOUR_GOOGLE_SHEET_URL'
+    offerFormUrl: 'https://forms.gle/L77FXngX4refmx6r8',
+    requestFormUrl: 'https://forms.gle/iwvJteS8xT8HyqKR7',
+    spreadsheetUrl: 'https://docs.google.com/spreadsheets/d/1ioLhZ6zvFgUro4eiQe7ro7jJe20J6gL6kEgHCelDS-8/edit?usp=sharing'
 };
 
 // Initialize the page
