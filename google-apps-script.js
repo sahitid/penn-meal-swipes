@@ -146,6 +146,14 @@ function findMatchesForNewOffer(offerData) {
 
   for (let i = 0; i < requests.length; i++) {
     const request = requests[i];
+    
+    // Prevent self-matching - check if emails match
+    const offerEmail = offerData[1] || '';
+    const requestEmail = request[1] || '';
+    if (offerEmail.toLowerCase().trim() === requestEmail.toLowerCase().trim()) {
+      continue; // Skip this request - same person
+    }
+    
     const matchScore = calculateMatchScore(offerData, request);
 
     if (matchScore >= 0.6) { // 60% compatibility threshold
@@ -182,6 +190,14 @@ function findMatchesForNewRequest(requestData) {
 
   for (let i = 0; i < offers.length; i++) {
     const offer = offers[i];
+    
+    // Prevent self-matching - check if emails match
+    const offerEmail = offer[1] || '';
+    const requestEmail = requestData[1] || '';
+    if (offerEmail.toLowerCase().trim() === requestEmail.toLowerCase().trim()) {
+      continue; // Skip this offer - same person
+    }
+    
     const matchScore = calculateMatchScore(offer, requestData);
 
     if (matchScore >= 0.6) {
@@ -419,6 +435,13 @@ function runManualMatching() {
 
   for (let offer of offersData) {
     for (let request of requestsData) {
+      // Prevent self-matching - check if emails match
+      const offerEmail = offer[1] || '';
+      const requestEmail = request[1] || '';
+      if (offerEmail.toLowerCase().trim() === requestEmail.toLowerCase().trim()) {
+        continue; // Skip this match - same person
+      }
+      
       const score = calculateMatchScore(offer, request);
 
       if (score >= 0.6) {
@@ -544,4 +567,10 @@ TROUBLESHOOTING:
 - Check the Executions log for errors (left sidebar in Apps Script)
 - Make sure sheet names in CONFIG match your actual sheet names
 - Ensure form column order matches the assumptions in the code
+- If you receive the wrong confirmation email (e.g., request email when submitting offer):
+  → Check your triggers - make sure onOfferSubmit is ONLY linked to the Offer form
+  → Make sure onRequestSubmit is ONLY linked to the Request form
+  → Delete and recreate triggers if they're misconfigured
+- If you get matched with yourself:
+  → This should now be prevented by the email check, but verify your triggers are correct
 */
