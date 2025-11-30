@@ -129,14 +129,14 @@ function createOfferCard(offer) {
     const lastInitial = offer.name.split(' ').length > 1 ? offer.name.split(' ')[1][0] + '.' : '';
     const displayName = `${firstName} ${lastInitial}`;
 
-    // Format dining halls
+    // Format dining halls - show all selected
     const diningHalls = typeof offer.diningHalls === 'string'
-        ? offer.diningHalls.split(',')[0].trim()
+        ? offer.diningHalls.split(',').map(h => h.trim()).join(', ')
         : 'Various';
 
-    // Format availability
+    // Format availability - show all selected
     const availability = typeof offer.availability === 'string'
-        ? offer.availability.split(',')[0].trim()
+        ? offer.availability.split(',').map(a => a.trim()).join(', ')
         : 'Flexible';
 
     card.innerHTML = `
