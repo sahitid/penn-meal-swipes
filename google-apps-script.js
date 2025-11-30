@@ -27,10 +27,38 @@ const CONFIG = {
 // FORM SUBMISSION TRIGGERS
 // ========================================
 
+// UNIVERSAL TRIGGER - Detects which form was submitted by checking the sheet name
+// Use this if "Select form" dropdown doesn't appear when creating triggers
+function onFormSubmit(e) {
+  const timestamp = new Date();
+  const response = e.values;
+  const sheet = e.range.getSheet();
+  const sheetName = sheet.getName();
+
+  // Debug: Log which sheet received the submission
+  Logger.log('onFormSubmit triggered - Sheet: ' + sheetName);
+
+  // Route to appropriate handler based on sheet name
+  if (sheetName === CONFIG.offersSheetName) {
+    // This is an offer submission
+    Logger.log('Detected as Offer form submission');
+    onOfferSubmit(e);
+  } else if (sheetName === CONFIG.requestsSheetName) {
+    // This is a request submission
+    Logger.log('Detected as Request form submission');
+    onRequestSubmit(e);
+  } else {
+    Logger.log('Unknown sheet: ' + sheetName + ' - No action taken');
+  }
+}
+
 // This function runs automatically when the "Offer Swipes" form is submitted
 function onOfferSubmit(e) {
   const timestamp = new Date();
   const response = e.values;
+
+  // Debug: Log which trigger fired
+  Logger.log('onOfferSubmit triggered - Offer form submitted');
 
   // Extract form data
   const email = response[1]; // Assuming email is in column B
@@ -47,6 +75,9 @@ function onOfferSubmit(e) {
 function onRequestSubmit(e) {
   const timestamp = new Date();
   const response = e.values;
+
+  // Debug: Log which trigger fired
+  Logger.log('onRequestSubmit triggered - Request form submitted');
 
   // Extract form data
   const email = response[1];
@@ -146,14 +177,14 @@ function findMatchesForNewOffer(offerData) {
 
   for (let i = 0; i < requests.length; i++) {
     const request = requests[i];
-    
+
     // Prevent self-matching - check if emails match
     const offerEmail = offerData[1] || '';
     const requestEmail = request[1] || '';
     if (offerEmail.toLowerCase().trim() === requestEmail.toLowerCase().trim()) {
       continue; // Skip this request - same person
     }
-    
+
     const matchScore = calculateMatchScore(offerData, request);
 
     if (matchScore >= 0.6) { // 60% compatibility threshold
@@ -190,14 +221,14 @@ function findMatchesForNewRequest(requestData) {
 
   for (let i = 0; i < offers.length; i++) {
     const offer = offers[i];
-    
+
     // Prevent self-matching - check if emails match
     const offerEmail = offer[1] || '';
     const requestEmail = requestData[1] || '';
     if (offerEmail.toLowerCase().trim() === requestEmail.toLowerCase().trim()) {
       continue; // Skip this offer - same person
     }
-    
+
     const matchScore = calculateMatchScore(offer, requestData);
 
     if (matchScore >= 0.6) {
@@ -441,7 +472,7 @@ function runManualMatching() {
       if (offerEmail.toLowerCase().trim() === requestEmail.toLowerCase().trim()) {
         continue; // Skip this match - same person
       }
-      
+
       const score = calculateMatchScore(offer, request);
 
       if (score >= 0.6) {
@@ -541,19 +572,61 @@ TO DEPLOY AS WEB APP (for displaying data on website):
 
 TO SET UP AUTOMATIC TRIGGERS:
 
-1. In Apps Script, click on the clock icon (Triggers) on the left
-2. Click "+ Add Trigger" (bottom right)
-3. Configure trigger for onOfferSubmit:
-   - Function: onOfferSubmit
-   - Event source: From spreadsheet
-   - Event type: On form submit
-   - Select the "Offer Swipes" form
-4. Click "+ Add Trigger" again for onRequestSubmit:
-   - Function: onRequestSubmit
-   - Event source: From spreadsheet
-   - Event type: On form submit
-   - Select the "Request Meals" form
-5. Authorize the script when prompted
+IMPORTANT: Both forms can be linked to the SAME spreadsheet, but they must write to DIFFERENT sheets (tabs):
+- "Offer Swipes" form → writes to "Offer Swipes Responses" sheet
+- "Request Meals" form → writes to "Request Meals Responses" sheet
+
+METHOD 1: Universal Trigger (RECOMMENDED - Use if "Select form" dropdown doesn't appear)
+
+This method uses ONE trigger that automatically detects which form was submitted:
+
+1. In Apps Script, click on the clock icon (Triggers) on the left sidebar
+2. DELETE any existing triggers (if you have old ones) - click the trash icon next to each
+3. Click "+ Add Trigger" (bottom right corner)
+4. Configure the trigger:
+   - Function to run: Select "onFormSubmit" from dropdown
+   - Event source: Select "From spreadsheet"
+   - Event type: Select "On form submit"
+   - (You don't need to select a specific form - this function detects it automatically)
+   - Click "Save"
+5. Authorize the script when prompted (grant necessary permissions)
+
+That's it! This ONE trigger will handle both forms automatically by checking which sheet received the submission.
+
+VERIFY YOUR TRIGGER:
+After setup, your Triggers page should show:
+- Trigger: Function: "onFormSubmit" | Event: "On form submit"
+- This single trigger works for both forms!
+
+METHOD 2: Separate Triggers (Use if "Select form" dropdown DOES appear)
+
+If you see a "Select form" dropdown when creating triggers:
+
+1. In Apps Script, click on the clock icon (Triggers) on the left sidebar
+2. DELETE any existing triggers (if you have old ones) - click the trash icon next to each
+3. Click "+ Add Trigger" (bottom right corner)
+
+4. Create trigger for onOfferSubmit:
+   - Function to run: Select "onOfferSubmit" from dropdown
+   - Event source: Select "From spreadsheet"
+   - Event type: Select "On form submit"
+   - Select form: Choose "Offer Swipes" form from dropdown
+   - Click "Save"
+
+5. Create trigger for onRequestSubmit:
+   - Click "+ Add Trigger" again
+   - Function to run: Select "onRequestSubmit" from dropdown
+   - Event source: Select "From spreadsheet"
+   - Event type: Select "On form submit"
+   - Select form: Choose "Request Meals" form from dropdown
+   - Click "Save"
+
+6. Authorize the script when prompted
+
+VERIFY YOUR TRIGGERS:
+After setup, you should see 2 triggers:
+- Trigger 1: Function: "onOfferSubmit" | Event: "On form submit" | Form: "Offer Swipes"
+- Trigger 2: Function: "onRequestSubmit" | Event: "On form submit" | Form: "Request Meals"
 
 TO RUN MANUAL MATCHING:
 
@@ -567,10 +640,26 @@ TROUBLESHOOTING:
 - Check the Executions log for errors (left sidebar in Apps Script)
 - Make sure sheet names in CONFIG match your actual sheet names
 - Ensure form column order matches the assumptions in the code
+
 - If you receive the wrong confirmation email (e.g., request email when submitting offer):
-  → Check your triggers - make sure onOfferSubmit is ONLY linked to the Offer form
-  → Make sure onRequestSubmit is ONLY linked to the Request form
-  → Delete and recreate triggers if they're misconfigured
+  → This means the wrong trigger is firing
+  → Go to Apps Script → Triggers (clock icon)
+  → Check which function is linked to which form
+  → You should see: "onOfferSubmit" → "Offer Swipes" form
+  → You should see: "onRequestSubmit" → "Request Meals" form
+  → If you see duplicates or wrong forms, DELETE all triggers and recreate them
+  → After fixing, test by submitting each form and check the Executions log
+  → The log will show "onOfferSubmit triggered" or "onRequestSubmit triggered"
+
 - If you get matched with yourself:
-  → This should now be prevented by the email check, but verify your triggers are correct
+  → This should now be prevented by the email check
+  → But verify your triggers are correct (see above)
+  → Also check that you don't have duplicate entries in your sheets
+
+- To debug which trigger is firing:
+  → Submit a form
+  → Go to Apps Script → Executions (left sidebar)
+  → Click on the most recent execution
+  → Check the logs - you'll see which function ran
+  → If the wrong function ran, your triggers are misconfigured
 */
