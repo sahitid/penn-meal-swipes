@@ -6,10 +6,6 @@
 // ========================================
 
 const CONFIG = {
-  // Email settings
-  senderEmail: "sahitid@wharton.upenn.edu", // Change this to your email
-  senderName: "Penn Meal Swipe Share",
-
   // Sheet names
   offersSheetName: "Offer Swipes Responses",
   requestsSheetName: "Request Meals Responses",
@@ -28,23 +24,17 @@ const CONFIG = {
 // ========================================
 
 // UNIVERSAL TRIGGER - Detects which form was submitted by checking the sheet name
-// Use this if "Select form" dropdown doesn't appear when creating triggers
+// Set this as your single trigger (Function: onFormSubmit, Event: On form submit)
 function onFormSubmit(e) {
-  const timestamp = new Date();
-  const response = e.values;
   const sheet = e.range.getSheet();
   const sheetName = sheet.getName();
 
-  // Debug: Log which sheet received the submission
   Logger.log('onFormSubmit triggered - Sheet: ' + sheetName);
 
-  // Route to appropriate handler based on sheet name
   if (sheetName === CONFIG.offersSheetName) {
-    // This is an offer submission
     Logger.log('Detected as Offer form submission');
     onOfferSubmit(e);
   } else if (sheetName === CONFIG.requestsSheetName) {
-    // This is a request submission
     Logger.log('Detected as Request form submission');
     onRequestSubmit(e);
   } else {
@@ -52,109 +42,18 @@ function onFormSubmit(e) {
   }
 }
 
-// This function runs automatically when the "Offer Swipes" form is submitted
+// Handles offer form submissions
 function onOfferSubmit(e) {
-  const timestamp = new Date();
   const response = e.values;
-
-  // Debug: Log which trigger fired
   Logger.log('onOfferSubmit triggered - Offer form submitted');
-
-  // Extract form data
-  const email = response[1]; // Assuming email is in column B
-  const name = response[2];
-
-  // Send confirmation email to the student who offered swipes
-  sendOfferConfirmationEmail(email, name);
-
-  // Try to find matches
   findMatchesForNewOffer(response);
 }
 
-// This function runs automatically when the "Request Meals" form is submitted
+// Handles request form submissions
 function onRequestSubmit(e) {
-  const timestamp = new Date();
   const response = e.values;
-
-  // Debug: Log which trigger fired
   Logger.log('onRequestSubmit triggered - Request form submitted');
-
-  // Extract form data
-  const email = response[1];
-  const name = response[2];
-
-  // Send confirmation email
-  sendRequestConfirmationEmail(email, name);
-
-  // Try to find matches
   findMatchesForNewRequest(response);
-}
-
-// ========================================
-// EMAIL CONFIRMATION FUNCTIONS
-// ========================================
-
-function sendOfferConfirmationEmail(email, name) {
-  const subject = "Thanks for Offering Meal Swipes! 🍽️";
-  const body = `
-Hi ${name},
-
-Thank you for signing up to share your meal swipes with upperclassmen through Penn Meal Swipe Share!
-
-Your profile is now live, and upperclassmen can see your availability. We'll notify you as soon as we find a great match for you.
-
-In the meantime:
-• Keep an eye on your email for match notifications
-• Make sure your schedule stays up to date
-• Reach out if you have any questions
-
-We're excited to help you make new connections at Penn!
-
-Best,
-The Penn Meal Swipe Share Team
-
----
-Questions? Reply to this email or check out our website.
-  `;
-
-  MailApp.sendEmail({
-    to: email,
-    subject: subject,
-    body: body
-  });
-}
-
-function sendRequestConfirmationEmail(email, name) {
-  const subject = "Your Meal Request is Active! 🍴";
-  const body = `
-Hi ${name},
-
-Thanks for joining Penn Meal Swipe Share! Your meal request has been received.
-
-We're now searching for underclassmen with meal swipes who match your preferences and availability. We'll email you as soon as we find a good match!
-
-What happens next:
-1. We'll review your preferences and availability
-2. Match you with compatible underclassmen
-3. Send you both an introduction email with each other's contact info
-4. You coordinate directly to schedule your meal
-
-Typical response time: 24-48 hours
-
-Looking forward to connecting you with a great dining partner!
-
-Best,
-The Penn Meal Swipe Share Team
-
----
-Questions? Reply to this email or check out our website.
-  `;
-
-  MailApp.sendEmail({
-    to: email,
-    subject: subject,
-    body: body
-  });
 }
 
 // ========================================
@@ -164,47 +63,37 @@ Questions? Reply to this email or check out our website.
 function findMatchesForNewOffer(offerData) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const requestsSheet = ss.getSheetByName(CONFIG.requestsSheetName);
-  const matchesSheet = ss.getSheetByName(CONFIG.matchesSheetName);
 
-  // Get all requests
   const requestsData = requestsSheet.getDataRange().getValues();
-
-  // Skip header row
   const requests = requestsData.slice(1);
 
-  // Find best matches
   const matches = [];
 
   for (let i = 0; i < requests.length; i++) {
     const request = requests[i];
 
-    // Prevent self-matching - check if emails match
-    const offerEmail = offerData[1] || '';
-    const requestEmail = request[1] || '';
-    if (offerEmail.toLowerCase().trim() === requestEmail.toLowerCase().trim()) {
-      continue; // Skip this request - same person
-    }
+    // Prevent self-matching
+    const offerEmail = (offerData[1] || '').toLowerCase().trim();
+    const requestEmail = (request[1] || '').toLowerCase().trim();
+    if (offerEmail === requestEmail) continue;
 
     const matchScore = calculateMatchScore(offerData, request);
 
-    if (matchScore >= 0.6) { // 60% compatibility threshold
+    if (matchScore >= 0.6) {
       matches.push({
         offer: offerData,
         request: request,
-        score: matchScore,
-        requestRowIndex: i + 2 // +2 for header and 0-indexing
+        score: matchScore
       });
     }
   }
 
-  // Sort by score (highest first)
   matches.sort((a, b) => b.score - a.score);
 
-  // Send match notification for top match (if exists)
   if (matches.length > 0) {
     const topMatch = matches[0];
-    sendMatchNotification(topMatch.offer, topMatch.request);
     recordMatch(topMatch.offer, topMatch.request, topMatch.score);
+    Logger.log('Match recorded: ' + topMatch.offer[2] + ' <-> ' + topMatch.request[2] + ' (score: ' + topMatch.score.toFixed(2) + ')');
   }
 }
 
@@ -212,22 +101,18 @@ function findMatchesForNewRequest(requestData) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const offersSheet = ss.getSheetByName(CONFIG.offersSheetName);
 
-  // Get all offers
   const offersData = offersSheet.getDataRange().getValues();
   const offers = offersData.slice(1);
 
-  // Find best matches
   const matches = [];
 
   for (let i = 0; i < offers.length; i++) {
     const offer = offers[i];
 
-    // Prevent self-matching - check if emails match
-    const offerEmail = offer[1] || '';
-    const requestEmail = requestData[1] || '';
-    if (offerEmail.toLowerCase().trim() === requestEmail.toLowerCase().trim()) {
-      continue; // Skip this offer - same person
-    }
+    // Prevent self-matching
+    const offerEmail = (offer[1] || '').toLowerCase().trim();
+    const requestEmail = (requestData[1] || '').toLowerCase().trim();
+    if (offerEmail === requestEmail) continue;
 
     const matchScore = calculateMatchScore(offer, requestData);
 
@@ -235,8 +120,7 @@ function findMatchesForNewRequest(requestData) {
       matches.push({
         offer: offer,
         request: requestData,
-        score: matchScore,
-        offerRowIndex: i + 2
+        score: matchScore
       });
     }
   }
@@ -245,33 +129,27 @@ function findMatchesForNewRequest(requestData) {
 
   if (matches.length > 0) {
     const topMatch = matches[0];
-    sendMatchNotification(topMatch.offer, topMatch.request);
     recordMatch(topMatch.offer, topMatch.request, topMatch.score);
+    Logger.log('Match recorded: ' + topMatch.offer[2] + ' <-> ' + topMatch.request[2] + ' (score: ' + topMatch.score.toFixed(2) + ')');
   }
 }
 
 function calculateMatchScore(offer, request) {
-  // Assuming column structure:
-  // [0]=Timestamp, [1]=Email, [2]=Name, [3]=Year, [4]=School, [5]=Swipes/Meals, [6]=Dining Halls, [7]=Availability, [8]=Interests...
+  // Column structure:
+  // [0]=Timestamp, [1]=Email, [2]=Name, [3]=Year, [4]=School, [5]=Swipes/Meals, [6]=Dining Halls, [7]=Availability, [8]=Interests
 
   let score = 0;
 
   // 1. Availability match (40%)
-  const offerAvailability = offer[7] || "";
-  const requestAvailability = request[7] || "";
-  const availabilityScore = calculateOverlap(offerAvailability, requestAvailability);
+  const availabilityScore = calculateOverlap(offer[7] || "", request[7] || "");
   score += availabilityScore * CONFIG.weights.availabilityMatch;
 
   // 2. Dining hall match (30%)
-  const offerDiningHalls = offer[6] || "";
-  const requestDiningHalls = request[6] || "";
-  const diningHallScore = calculateOverlap(offerDiningHalls, requestDiningHalls);
+  const diningHallScore = calculateOverlap(offer[6] || "", request[6] || "");
   score += diningHallScore * CONFIG.weights.diningHallMatch;
 
   // 3. Interests similarity (30%)
-  const offerInterests = offer[8] || "";
-  const requestInterests = request[8] || "";
-  const interestsScore = calculateTextSimilarity(offerInterests, requestInterests);
+  const interestsScore = calculateTextSimilarity(offer[8] || "", request[8] || "");
   score += interestsScore * CONFIG.weights.interestsSimilarity;
 
   return score;
@@ -280,7 +158,6 @@ function calculateMatchScore(offer, request) {
 function calculateOverlap(str1, str2) {
   if (!str1 || !str2) return 0;
 
-  // Split by common separators
   const items1 = str1.toLowerCase().split(/[,;]+/).map(s => s.trim());
   const items2 = str2.toLowerCase().split(/[,;]+/).map(s => s.trim());
 
@@ -300,7 +177,6 @@ function calculateOverlap(str1, str2) {
 function calculateTextSimilarity(text1, text2) {
   if (!text1 || !text2) return 0;
 
-  // Simple word-based similarity
   const words1 = text1.toLowerCase().split(/\s+/);
   const words2 = text2.toLowerCase().split(/\s+/);
 
@@ -312,103 +188,6 @@ function calculateTextSimilarity(text1, text2) {
   }
 
   return commonWords / Math.max(words1.length, words2.length);
-}
-
-// ========================================
-// MATCH NOTIFICATION
-// ========================================
-
-function sendMatchNotification(offer, request) {
-  // Extract data (adjust column indices based on your actual form structure)
-  const offerEmail = offer[1];
-  const offerName = offer[2];
-  const offerYear = offer[3];
-  const offerSchool = offer[4];
-  const offerAvailability = offer[7];
-  const offerInterests = offer[8];
-
-  const requestEmail = request[1];
-  const requestName = request[2];
-  const requestYear = request[3];
-  const requestSchool = request[4];
-  const requestAvailability = request[7];
-  const requestInterests = request[8];
-
-  // Email to underclassman (offering swipes)
-  const offerSubject = `You've Been Matched! Meet ${requestName} 🎉`;
-  const offerBody = `
-Hi ${offerName},
-
-Great news! We've found a great match for you!
-
-You've been paired with ${requestName}, a ${requestYear} in ${requestSchool} who would love to share a meal with you.
-
-About ${requestName}:
-• Year: ${requestYear}
-• School/Major: ${requestSchool}
-• Availability: ${requestAvailability}
-• Interests: ${requestInterests}
-• Email: ${requestEmail}
-
-Next Steps:
-1. Email ${requestName} at ${requestEmail} to introduce yourself
-2. Compare schedules and find a time that works for both of you
-3. Pick a dining hall you both like
-4. Meet up and enjoy your meal together!
-
-Tips for a great first meeting:
-• Confirm the time and place 24 hours before
-• Exchange phone numbers for day-of coordination
-• Be yourself and have fun!
-
-Looking forward to hearing how it goes!
-
-Best,
-The Penn Meal Swipe Share Team
-  `;
-
-  // Email to upperclassman (requesting meal)
-  const requestSubject = `You've Been Matched! Meet ${offerName} 🎉`;
-  const requestBody = `
-Hi ${requestName},
-
-Exciting news! We've found a perfect dining partner for you!
-
-You've been paired with ${offerName}, a ${offerYear} in ${offerSchool} who wants to share their meal swipes.
-
-About ${offerName}:
-• Year: ${offerYear}
-• School/Major: ${offerSchool}
-• Availability: ${offerAvailability}
-• Interests: ${offerInterests}
-• Email: ${offerEmail}
-
-Next Steps:
-1. Email ${offerName} at ${offerEmail} to introduce yourself
-2. Compare schedules and find a time that works for both of you
-3. Pick a dining hall you both like
-4. Meet up and enjoy your meal together!
-
-Remember: ${offerName} is generously sharing their meal swipes with you, so be respectful of their time and appreciative of their generosity!
-
-Have a great meal together!
-
-Best,
-The Penn Meal Swipe Share Team
-  `;
-
-  // Send emails
-  MailApp.sendEmail({
-    to: offerEmail,
-    subject: offerSubject,
-    body: offerBody
-  });
-
-  MailApp.sendEmail({
-    to: requestEmail,
-    subject: requestSubject,
-    body: requestBody
-  });
 }
 
 // ========================================
@@ -435,12 +214,11 @@ function recordMatch(offer, request, score) {
     ]);
   }
 
-  // Add match record
   matchesSheet.appendRow([
     new Date(),
-    offer[2], // Name
-    offer[1], // Email
-    offer[3], // Year
+    offer[2],  // Name
+    offer[1],  // Email
+    offer[3],  // Year
     request[2], // Name
     request[1], // Email
     request[3], // Year
@@ -453,64 +231,46 @@ function recordMatch(offer, request, score) {
 // MANUAL MATCHING FUNCTION
 // ========================================
 
-// Run this manually to find and send all possible matches
+// Run this manually in Apps Script to match all existing offers and requests
 function runManualMatching() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const offersSheet = ss.getSheetByName(CONFIG.offersSheetName);
-  const requestsSheet = ss.getSheetByName(CONFIG.requestsSheetName);
-
-  const offersData = offersSheet.getDataRange().getValues().slice(1);
-  const requestsData = requestsSheet.getDataRange().getValues().slice(1);
+  const offersData = ss.getSheetByName(CONFIG.offersSheetName).getDataRange().getValues().slice(1);
+  const requestsData = ss.getSheetByName(CONFIG.requestsSheetName).getDataRange().getValues().slice(1);
 
   let matchCount = 0;
 
   for (let offer of offersData) {
     for (let request of requestsData) {
-      // Prevent self-matching - check if emails match
-      const offerEmail = offer[1] || '';
-      const requestEmail = request[1] || '';
-      if (offerEmail.toLowerCase().trim() === requestEmail.toLowerCase().trim()) {
-        continue; // Skip this match - same person
-      }
+      // Prevent self-matching
+      const offerEmail = (offer[1] || '').toLowerCase().trim();
+      const requestEmail = (request[1] || '').toLowerCase().trim();
+      if (offerEmail === requestEmail) continue;
 
       const score = calculateMatchScore(offer, request);
 
       if (score >= 0.6) {
-        sendMatchNotification(offer, request);
         recordMatch(offer, request, score);
         matchCount++;
       }
     }
   }
 
-  Logger.log(`Found and sent ${matchCount} matches`);
-
-  // Send summary email to admin
-  MailApp.sendEmail({
-    to: CONFIG.senderEmail,
-    subject: "Manual Matching Complete",
-    body: `Manual matching process completed. ${matchCount} matches were found and notifications sent.`
-  });
+  Logger.log('Manual matching complete. ' + matchCount + ' matches recorded.');
 }
 
 // ========================================
 // WEB APP API - Serve data to website
 // ========================================
 
-// This function serves data when the web app is accessed
 function doGet(e) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const offersSheet = ss.getSheetByName(CONFIG.offersSheetName);
 
-    // Get all offer data
     const offersData = offersSheet.getDataRange().getValues();
-    const headers = offersData[0];
-    const offers = offersData.slice(1); // Skip header row
+    const offers = offersData.slice(1);
 
-    // Transform into JSON-friendly format
     const offersJson = offers.map(row => {
-      // Adjust these indices based on your actual form columns
       return {
         timestamp: row[0],
         email: row[1],
@@ -525,7 +285,6 @@ function doGet(e) {
       };
     });
 
-    // Return as JSON
     return ContentService
       .createTextOutput(JSON.stringify({
         success: true,
@@ -554,112 +313,35 @@ TO SET UP THIS SCRIPT:
 1. Open your Google Sheet with form responses
 2. Go to Extensions → Apps Script
 3. Delete any existing code and paste this entire script
-4. Update the CONFIG section at the top with your email and sheet names
-5. Save the script (File → Save or Ctrl+S)
+4. Update CONFIG.offersSheetName and CONFIG.requestsSheetName to match your exact sheet tab names
+5. Save the script (Ctrl+S)
 
-TO DEPLOY AS WEB APP (for displaying data on website):
+TO DEPLOY AS WEB APP (for displaying cards on the website):
 
 1. In Apps Script, click "Deploy" → "New deployment"
 2. Click the gear icon next to "Select type" → Choose "Web app"
 3. Configure:
-   - Description: "Penn Meal Swipe API"
    - Execute as: "Me"
    - Who has access: "Anyone"
-4. Click "Deploy"
-5. Copy the Web App URL (looks like https://script.google.com/macros/s/.../exec)
-6. Paste this URL into CONFIG.apiUrl in script.js
-7. Click "Authorize access" and grant permissions
+4. Click "Deploy" and copy the Web App URL
+5. Paste the URL into CONFIG.apiUrl in script.js on your website
 
-TO SET UP AUTOMATIC TRIGGERS:
+TO SET UP THE TRIGGER:
 
-IMPORTANT: Both forms can be linked to the SAME spreadsheet, but they must write to DIFFERENT sheets (tabs):
-- "Offer Swipes" form → writes to "Offer Swipes Responses" sheet
-- "Request Meals" form → writes to "Request Meals Responses" sheet
+1. In Apps Script, click the clock icon (Triggers) on the left sidebar
+2. Delete any existing triggers
+3. Click "+ Add Trigger"
+4. Configure:
+   - Function to run: onFormSubmit
+   - Event source: From spreadsheet
+   - Event type: On form submit
+5. Click Save and authorize when prompted
 
-METHOD 1: Universal Trigger (RECOMMENDED - Use if "Select form" dropdown doesn't appear)
-
-This method uses ONE trigger that automatically detects which form was submitted:
-
-1. In Apps Script, click on the clock icon (Triggers) on the left sidebar
-2. DELETE any existing triggers (if you have old ones) - click the trash icon next to each
-3. Click "+ Add Trigger" (bottom right corner)
-4. Configure the trigger:
-   - Function to run: Select "onFormSubmit" from dropdown
-   - Event source: Select "From spreadsheet"
-   - Event type: Select "On form submit"
-   - (You don't need to select a specific form - this function detects it automatically)
-   - Click "Save"
-5. Authorize the script when prompted (grant necessary permissions)
-
-That's it! This ONE trigger will handle both forms automatically by checking which sheet received the submission.
-
-VERIFY YOUR TRIGGER:
-After setup, your Triggers page should show:
-- Trigger: Function: "onFormSubmit" | Event: "On form submit"
-- This single trigger works for both forms!
-
-METHOD 2: Separate Triggers (Use if "Select form" dropdown DOES appear)
-
-If you see a "Select form" dropdown when creating triggers:
-
-1. In Apps Script, click on the clock icon (Triggers) on the left sidebar
-2. DELETE any existing triggers (if you have old ones) - click the trash icon next to each
-3. Click "+ Add Trigger" (bottom right corner)
-
-4. Create trigger for onOfferSubmit:
-   - Function to run: Select "onOfferSubmit" from dropdown
-   - Event source: Select "From spreadsheet"
-   - Event type: Select "On form submit"
-   - Select form: Choose "Offer Swipes" form from dropdown
-   - Click "Save"
-
-5. Create trigger for onRequestSubmit:
-   - Click "+ Add Trigger" again
-   - Function to run: Select "onRequestSubmit" from dropdown
-   - Event source: Select "From spreadsheet"
-   - Event type: Select "On form submit"
-   - Select form: Choose "Request Meals" form from dropdown
-   - Click "Save"
-
-6. Authorize the script when prompted
-
-VERIFY YOUR TRIGGERS:
-After setup, you should see 2 triggers:
-- Trigger 1: Function: "onOfferSubmit" | Event: "On form submit" | Form: "Offer Swipes"
-- Trigger 2: Function: "onRequestSubmit" | Event: "On form submit" | Form: "Request Meals"
+This single trigger handles both forms automatically by detecting which sheet was updated.
 
 TO RUN MANUAL MATCHING:
 
-1. In Apps Script, select the function "runManualMatching" from the dropdown
-2. Click the Run button (▶️)
-3. Check your email for the summary
-
-TROUBLESHOOTING:
-
-- If emails aren't sending, check your email quota (100 emails/day for free accounts)
-- Check the Executions log for errors (left sidebar in Apps Script)
-- Make sure sheet names in CONFIG match your actual sheet names
-- Ensure form column order matches the assumptions in the code
-
-- If you receive the wrong confirmation email (e.g., request email when submitting offer):
-  → This means the wrong trigger is firing
-  → Go to Apps Script → Triggers (clock icon)
-  → Check which function is linked to which form
-  → You should see: "onOfferSubmit" → "Offer Swipes" form
-  → You should see: "onRequestSubmit" → "Request Meals" form
-  → If you see duplicates or wrong forms, DELETE all triggers and recreate them
-  → After fixing, test by submitting each form and check the Executions log
-  → The log will show "onOfferSubmit triggered" or "onRequestSubmit triggered"
-
-- If you get matched with yourself:
-  → This should now be prevented by the email check
-  → But verify your triggers are correct (see above)
-  → Also check that you don't have duplicate entries in your sheets
-
-- To debug which trigger is firing:
-  → Submit a form
-  → Go to Apps Script → Executions (left sidebar)
-  → Click on the most recent execution
-  → Check the logs - you'll see which function ran
-  → If the wrong function ran, your triggers are misconfigured
+1. In Apps Script, select "runManualMatching" from the function dropdown
+2. Click Run (▶️)
+3. Check the Matches sheet in your spreadsheet for results
 */
